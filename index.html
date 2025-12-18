@@ -112,7 +112,13 @@
         ];
         let qIdx = 0, qStart, qDur, timerInt;
 
-        document.getElementById('startButton').onclick = () => { document.getElementById('initialControls').style.display='none'; gameRunning=true; animationId=requestAnimationFrame(update); };
+        document.getElementById('startButton').onclick = () => {
+            document.getElementById('initialControls').style.display='none';
+            gameRunning = true;
+            lastObs = performance.now();
+            animationId = requestAnimationFrame(update);
+        };
+
         document.getElementById('startQuizBtn').onclick = () => {
             document.getElementById('winMsg').style.display='none'; document.getElementById('quizContainer').style.display='flex';
             qStart = Date.now(); timerInt = setInterval(() => { document.getElementById('timer').innerText = ((Date.now()-qStart)/1000).toFixed(1) + 's'; }, 100);
@@ -137,10 +143,8 @@
             document.getElementById('status').innerText = "Saving Results...";
             const payload = { name: n, email: e, placeOfPractice: p, quizTime: qDur, score: 1000 };
 
-            // Save to Firestore (Optional)
-            if (db) { addDoc(collection(db, "artifacts/bilastine-focus-challenge/public/data/game_entries"), { ...payload, time: serverTimestamp() }); }
+            if (db) { try { await addDoc(collection(db, "artifacts/bilastine-focus-challenge/public/data/game_entries"), { ...payload, time: serverTimestamp() }); } catch(err) { console.error(err); } }
 
-            // Save to Google Sheets (Via Bridge)
             if (SHEETS_URL) {
                 try {
                     await fetch(SHEETS_URL, { method: 'POST', mode: 'no-cors', cache: 'no-cache', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
