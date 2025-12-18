@@ -5,106 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bilastine: Focus Challenge</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-
-        body {
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #e0f2f7 0%, #bbdefb 100%);
-            margin: 0;
-            overflow: hidden;
-            touch-action: none;
-            color: #333;
-        }
-
-        .game-container {
-            background-color: #ffffff;
-            border-radius: 24px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            max-width: 95%;
-            width: 500px;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
+        @import url('[https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap](https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap)');
+        body { font-family: 'Inter', sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #e0f2f7 0%, #bbdefb 100%); margin: 0; overflow: hidden; touch-action: none; color: #333; }
+        .game-container { background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1); padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 15px; max-width: 95%; width: 500px; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         h1 { color: #1976d2; margin: 0; font-size: 1.5rem; text-align: center; font-weight: 800; }
-
-        canvas {
-            background-color: #81d4fa;
-            border: 3px solid #64b5f6;
-            border-radius: 16px;
-            display: block;
-            touch-action: none;
-            width: 100%;
-            height: auto;
-        }
-
+        canvas { background-color: #81d4fa; border: 3px solid #64b5f6; border-radius: 16px; display: block; touch-action: none; width: 100%; height: auto; }
         .game-info { font-size: 1.2rem; font-weight: 800; color: #0d47a1; }
-
-        button {
-            background: linear-gradient(to right, #4caf50, #66bb6a);
-            color: white; border: none; padding: 18px; border-radius: 14px;
-            font-size: 1.1rem; cursor: pointer; font-weight: 700; width: 100%;
-            box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
-        }
-
+        button { background: linear-gradient(to right, #4caf50, #66bb6a); color: white; border: none; padding: 18px; border-radius: 14px; font-size: 1.1rem; cursor: pointer; font-weight: 700; width: 100%; box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3); user-select: none; }
         button:active { transform: scale(0.97); }
-
         .ui-section { width: 100%; display: none; text-align: center; padding: 15px; border-radius: 16px; animation: fadeIn 0.4s ease; box-sizing: border-box; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
         .win-message { background: #e8f5e9; border: 2px solid #a5d6a7; color: #2e7d32; }
         .lose-message { background: #ffebee; border: 2px solid #ef9a9a; color: #c62828; }
         .quiz-section { background: #f1f8ff; border: 2px solid #2196f3; flex-direction: column; align-items: center; }
-
-        .quiz-option {
-            display: block; width: 100%; padding: 16px; margin: 10px 0;
-            background: white; border: 2px solid #cbd5e1; border-radius: 14px;
-            font-weight: 600; font-size: 1rem; color: #1e293b; transition: 0.2s;
-        }
-
+        .quiz-option { display: block; width: 100%; padding: 16px; margin: 10px 0; background: white; border: 2px solid #cbd5e1; border-radius: 14px; font-weight: 600; font-size: 1rem; color: #1e293b; transition: 0.2s; text-align: center; }
         #timer { font-size: 1.5rem; font-weight: 800; color: #d32f2f; background: #fff; padding: 5px 20px; border-radius: 20px; border: 2px solid #ffcdd2; margin-bottom: 10px; }
-
         .data-form { background: #f8fafc; border: 2px solid #e2e8f0; padding: 20px; display: none; flex-direction: column; gap: 12px; width: 100%; border-radius: 16px; box-sizing: border-box; }
         .data-form input { padding: 16px; border: 2px solid #cbd5e1; border-radius: 12px; font-size: 1rem; width: 100%; box-sizing: border-box; }
     </style>
 </head>
 <body>
-
     <div class="game-container">
         <h1>BILASTINE FOCUS CHALLENGE</h1>
         <canvas id="gameCanvas"></canvas>
         <div class="game-info">Score: <span id="score">0</span> / 1000</div>
-        
         <div id="initialControls" style="width:100%"><button id="startButton">START FLIGHT</button></div>
-
         <div id="winMsg" class="ui-section win-message">
             <h3>MISSION SUCCESS!</h3>
             <p>Score: 1000 reached. You are focused!</p>
             <button id="startQuizBtn">TAKE FOCUS QUIZ</button>
         </div>
-
         <div id="loseMsg" class="ui-section lose-message">
             <h3>TURBULENCE!</h3>
             <p>You lost focus. Practice makes perfect.</p>
             <button onclick="location.reload()">TRY AGAIN</button>
         </div>
-
         <div id="quizContainer" class="ui-section quiz-section">
             <div id="timer">0.0s</div>
             <p id="questionText" style="font-weight:700"></p>
             <div id="optionsContainer" style="width:100%"></div>
         </div>
-
         <div id="dataForm" class="data-form">
             <h3>RECORD PERFORMANCE</h3>
             <p id="finalStats" style="color:#1976d2; font-weight:700"></p>
@@ -117,43 +57,35 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeApp } from "[https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js](https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js)";
+        import { getAuth, signInAnonymously } from "[https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js](https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js)";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "[https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js](https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js)";
 
-        // --- PASTE YOUR CONFIG HERE ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyAzuyfJmP3Wz78KZKBXTIh74cKA3k9duI8",
-            authDomain: "sg-bilastine-focus-2026.firebaseapp.com",
-            projectId: "sg-bilastine-focus-2026",
-            storageBucket: "sg-bilastine-focus-2026.firebasestorage.app",
-            messagingSenderId: "90505020446",
-            appId: "1:90505020446:web:aaffdc8484bffc00a25a0f"
-        };
+        // --- PASTE YOUR CONFIGS HERE ---
+        const firebaseConfig = { apiKey: "", authDomain: "", projectId: "", storageBucket: "", messagingSenderId: "", appId: "" };
+        const SHEETS_URL = "https://script.google.com/macros/s/AKfycbwzORkLD0hBR8gKXve8CGDzkoyAA632rEO8h3vXG7FHN9lOl_YbDU_xbJ97TaHFyMx1/exec"; // PASTE GOOGLE APPS SCRIPT URL HERE
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        signInAnonymously(auth);
+        let db = null;
+        try {
+            if (firebaseConfig.apiKey) {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                signInAnonymously(getAuth(app));
+            }
+        } catch (e) { console.error("Firebase Error:", e); }
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         let gameRunning = false, score = 0, lastObs = 0, animationId;
         const airplane = { x: 0, y: 0, w: 40, h: 30 }, obstacles = [];
 
-        function resize() {
-            canvas.width = canvas.parentElement.clientWidth - 48;
-            canvas.height = 280;
-            airplane.x = canvas.width/2 - 20; airplane.y = canvas.height - 50;
-        }
+        function resize() { canvas.width = canvas.parentElement.clientWidth - 48; canvas.height = 280; airplane.x = canvas.width/2 - 20; airplane.y = canvas.height - 50; }
         window.onresize = resize; resize();
 
         function draw() {
             ctx.clearRect(0,0,canvas.width,canvas.height);
             ctx.fillStyle = '#FFD700'; ctx.fillRect(airplane.x, airplane.y, airplane.w, airplane.h);
-            ctx.fillStyle = '#fff'; obstacles.forEach(o => {
-                ctx.beginPath(); ctx.arc(o.x+10, o.y+10, 12, 0, Math.PI*2); ctx.arc(o.x+22, o.y+12, 14, 0, Math.PI*2); ctx.fill();
-            });
+            ctx.fillStyle = '#fff'; obstacles.forEach(o => { ctx.beginPath(); ctx.arc(o.x+10, o.y+10, 12, 0, Math.PI*2); ctx.arc(o.x+22, o.y+12, 14, 0, Math.PI*2); ctx.fill(); });
         }
 
         function update(t) {
@@ -161,21 +93,18 @@
             if(t - lastObs > 500) { obstacles.push({x: Math.random()*(canvas.width-35), y:-40, w:35, h:25}); lastObs = t; }
             for(let i=obstacles.length-1; i>=0; i--) {
                 obstacles[i].y += 5;
-                if(airplane.x < obstacles[i].x+35 && airplane.x+40 > obstacles[i].x && airplane.y < obstacles[i].y+25 && airplane.y+30 > obstacles[i].y) {
-                    gameRunning = false; document.getElementById('loseMsg').style.display='block'; return;
-                }
+                if(airplane.x < obstacles[i].x+35 && airplane.x+40 > obstacles[i].x && airplane.y < obstacles[i].y+25 && airplane.y+30 > obstacles[i].y) { gameRunning = false; document.getElementById('loseMsg').style.display='block'; return; }
                 if(obstacles[i].y > canvas.height) { obstacles.splice(i,1); score += 50; document.getElementById('score').innerText = score; }
             }
             if(score >= 1000) { gameRunning = false; document.getElementById('winMsg').style.display='block'; return; }
             draw(); animationId = requestAnimationFrame(update);
         }
 
-        function move(e) {
+        canvas.addEventListener('pointermove', (e) => {
             if(!gameRunning) return;
-            const x = (e.clientX || e.touches[0].clientX) - canvas.getBoundingClientRect().left - 20;
+            const x = (e.clientX || (e.touches && e.touches[0].clientX)) - canvas.getBoundingClientRect().left - 20;
             airplane.x = Math.max(0, Math.min(canvas.width - 40, x));
-        }
-        canvas.addEventListener('pointermove', move);
+        });
 
         const questions = [
             { q: "Primary advantage of Bilastine?", options: ["Causes Drowsiness", "Non-sedating Profile", "Take with Food"], c: 1 },
@@ -195,30 +124,33 @@
             const cont = document.getElementById('optionsContainer'); cont.innerHTML = '';
             q.options.forEach((o, i) => {
                 const b = document.createElement('button'); b.className = 'quiz-option'; b.innerText = o;
-                b.onclick = () => {
-                    if(i === q.c) { qIdx++; if(qIdx < questions.length) renderQ(); else endQuiz(); }
-                    else { b.style.borderColor='red'; setTimeout(()=>b.style.borderColor='#cbd5e1', 500); }
-                };
+                b.onclick = () => { if(i === q.c) { qIdx++; if(qIdx < questions.length) renderQ(); else endQuiz(); } else { b.style.borderColor='red'; setTimeout(()=>b.style.borderColor='#cbd5e1', 500); } };
                 cont.appendChild(b);
             });
         }
 
-        function endQuiz() {
-            clearInterval(timerInt); qDur = (Date.now()-qStart)/1000;
-            document.getElementById('quizContainer').style.display='none'; document.getElementById('dataForm').style.display='flex';
-            document.getElementById('finalStats').innerText = `Focused Quiz Time: ${qDur.toFixed(2)}s`;
-        }
+        function endQuiz() { clearInterval(timerInt); qDur = (Date.now()-qStart)/1000; document.getElementById('quizContainer').style.display='none'; document.getElementById('dataForm').style.display='flex'; document.getElementById('finalStats').innerText = `Focused Quiz Time: ${qDur.toFixed(2)}s`; }
 
         document.getElementById('submitBtn').onclick = async () => {
             const n = document.getElementById('playerName').value, e = document.getElementById('playerEmail').value, p = document.getElementById('placeOfPractice').value;
             if(!n || !e || !p) return;
-            document.getElementById('status').innerText = "Saving...";
-            try {
-                await addDoc(collection(db, "artifacts/bilastine-focus-challenge/public/data/game_entries"), { n, e, p, qDur, score: 1000, time: serverTimestamp() });
-                document.getElementById('status').innerText = "Record Saved! Thank you."; setTimeout(()=>location.reload(), 2000);
-            } catch(err) { document.getElementById('status').innerText = "Error saving."; }
+            document.getElementById('status').innerText = "Saving Results...";
+            const payload = { name: n, email: e, placeOfPractice: p, quizTime: qDur, score: 1000 };
+
+            // Save to Firestore (Optional)
+            if (db) { addDoc(collection(db, "artifacts/bilastine-focus-challenge/public/data/game_entries"), { ...payload, time: serverTimestamp() }); }
+
+            // Save to Google Sheets (Via Bridge)
+            if (SHEETS_URL) {
+                try {
+                    await fetch(SHEETS_URL, { method: 'POST', mode: 'no-cors', cache: 'no-cache', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                    document.getElementById('status').innerText = "Saved to Sheet! Thank you.";
+                } catch(err) { console.error("Sheets Error:", err); document.getElementById('status').innerText = "Saved locally. Sheet error."; }
+            } else {
+                document.getElementById('status').innerText = "Record Saved locally.";
+            }
+            setTimeout(()=>location.reload(), 2000);
         };
     </script>
 </body>
-
 </html>
