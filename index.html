@@ -9,7 +9,7 @@
         body { font-family: 'Inter', sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #e0f2f7 0%, #bbdefb 100%); margin: 0; overflow: hidden; touch-action: none; color: #333; }
         .game-container { background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1); padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 15px; max-width: 95%; width: 500px; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         h1 { color: #1976d2; margin: 0; font-size: 1.5rem; text-align: center; font-weight: 800; }
-        canvas { background-color: #81d4fa; border: 3px solid #64b5f6; border-radius: 16px; display: block; touch-action: none; width: 100%; height: auto; }
+        canvas { background-color: #81d4fa; border: 3px solid #64b5f6; border-radius: 16px; display: block; touch-action: none; width: 100%; height: auto; cursor: crosshair; }
         .game-info { font-size: 1.2rem; font-weight: 800; color: #0d47a1; }
         button { background: linear-gradient(to right, #4caf50, #66bb6a); color: white; border: none; padding: 18px; border-radius: 14px; font-size: 1.1rem; cursor: pointer; font-weight: 700; width: 100%; box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3); user-select: none; }
         button:active { transform: scale(0.97); }
@@ -63,7 +63,7 @@
 
         // --- PASTE YOUR CONFIGS HERE ---
         const firebaseConfig = { apiKey: "", authDomain: "", projectId: "", storageBucket: "", messagingSenderId: "", appId: "" };
-        const SHEETS_URL = ""; // PASTE GOOGLE APPS SCRIPT URL HERE
+        const SHEETS_URL = ""; 
 
         let db = null;
         try {
@@ -79,13 +79,20 @@
         let gameRunning = false, score = 0, lastObs = 0, animationId;
         const airplane = { x: 0, y: 0, w: 40, h: 30 }, obstacles = [];
 
-        function resize() { canvas.width = canvas.parentElement.clientWidth - 48; canvas.height = 280; airplane.x = canvas.width/2 - 20; airplane.y = canvas.height - 50; }
+        function resize() { 
+            canvas.width = canvas.parentElement.clientWidth - 48; 
+            canvas.height = 280; 
+            airplane.x = canvas.width/2 - 20; 
+            airplane.y = canvas.height - 50; 
+        }
         window.onresize = resize; resize();
 
         function draw() {
             ctx.clearRect(0,0,canvas.width,canvas.height);
             ctx.fillStyle = '#FFD700'; ctx.fillRect(airplane.x, airplane.y, airplane.w, airplane.h);
-            ctx.fillStyle = '#fff'; obstacles.forEach(o => { ctx.beginPath(); ctx.arc(o.x+10, o.y+10, 12, 0, Math.PI*2); ctx.arc(o.x+22, o.y+12, 14, 0, Math.PI*2); ctx.fill(); });
+            ctx.fillStyle = '#fff'; obstacles.forEach(o => { 
+                ctx.beginPath(); ctx.arc(o.x+10, o.y+10, 12, 0, Math.PI*2); ctx.arc(o.x+22, o.y+12, 14, 0, Math.PI*2); ctx.fill(); 
+            });
         }
 
         function update(t) {
@@ -93,17 +100,29 @@
             if(t - lastObs > 500) { obstacles.push({x: Math.random()*(canvas.width-35), y:-40, w:35, h:25}); lastObs = t; }
             for(let i=obstacles.length-1; i>=0; i--) {
                 obstacles[i].y += 5;
-                if(airplane.x < obstacles[i].x+35 && airplane.x+40 > obstacles[i].x && airplane.y < obstacles[i].y+25 && airplane.y+30 > obstacles[i].y) { gameRunning = false; document.getElementById('loseMsg').style.display='block'; return; }
+                if(airplane.x < obstacles[i].x+35 && airplane.x+40 > obstacles[i].x && airplane.y < obstacles[i].y+25 && airplane.y+30 > obstacles[i].y) { 
+                    gameRunning = false; document.getElementById('loseMsg').style.display='block'; return; 
+                }
                 if(obstacles[i].y > canvas.height) { obstacles.splice(i,1); score += 50; document.getElementById('score').innerText = score; }
             }
             if(score >= 1000) { gameRunning = false; document.getElementById('winMsg').style.display='block'; return; }
             draw(); animationId = requestAnimationFrame(update);
         }
 
+        // Pointer (Mouse/Touch) Movement
         canvas.addEventListener('pointermove', (e) => {
             if(!gameRunning) return;
-            const x = (e.clientX || (e.touches && e.touches[0].clientX)) - canvas.getBoundingClientRect().left - 20;
-            airplane.x = Math.max(0, Math.min(canvas.width - 40, x));
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left - (airplane.w / 2);
+            airplane.x = Math.max(0, Math.min(canvas.width - airplane.w, x));
+        });
+
+        // Keyboard Movement (Desktop Fallback)
+        window.addEventListener('keydown', (e) => {
+            if(!gameRunning) return;
+            const step = 25;
+            if(e.key === "ArrowLeft") airplane.x = Math.max(0, airplane.x - step);
+            if(e.key === "ArrowRight") airplane.x = Math.min(canvas.width - airplane.w, airplane.x + step);
         });
 
         const questions = [
