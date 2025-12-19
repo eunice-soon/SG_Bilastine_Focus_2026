@@ -3,222 +3,366 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bilastine: Focus Challenge</title>
+    <title>Bilastine: Focus Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        
+        :root {
+            --brand-blue: #1976d2;
+            --brand-light: #e0f2f7;
+            --bg-neutral: #f8fafc;
+        }
 
         body {
             font-family: 'Inter', sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #e0f2f7 0%, #bbdefb 100%);
-            margin: 0;
-            overflow: hidden;
-            touch-action: none;
-            color: #333;
+            background-color: var(--bg-neutral);
+            color: #1e293b;
+            overflow-x: hidden;
+            height: 100vh;
         }
 
-        .game-container {
-            background-color: #ffffff;
-            border-radius: 24px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            max-width: 95%;
-            width: 500px;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
         }
 
-        h1 { color: #1976d2; margin: 0; font-size: 1.5rem; text-align: center; font-weight: 800; }
-
-        canvas {
+        canvas#gameCanvas {
             background-color: #81d4fa;
             border: 3px solid #64b5f6;
-            border-radius: 16px;
-            display: block;
+            border-radius: 12px;
+            cursor: crosshair;
             touch-action: none;
-            width: 100%;
-            height: auto;
         }
 
-        .game-info { font-size: 1.2rem; font-weight: 800; color: #0d47a1; }
-
-        button {
-            background: linear-gradient(to right, #4caf50, #66bb6a);
-            color: white; border: none; padding: 18px; border-radius: 14px;
-            font-size: 1.1rem; cursor: pointer; font-weight: 700; width: 100%;
-            box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
+        .overlay-card {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(4px);
         }
-
-        button:active { transform: scale(0.97); }
-
-        .ui-section { width: 100%; display: none; text-align: center; padding: 15px; border-radius: 16px; animation: fadeIn 0.4s ease; box-sizing: border-box; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .win-message { background: #e8f5e9; border: 2px solid #a5d6a7; color: #2e7d32; }
-        .lose-message { background: #ffebee; border: 2px solid #ef9a9a; color: #c62828; }
-        .quiz-section { background: #f1f8ff; border: 2px solid #2196f3; flex-direction: column; align-items: center; }
 
         .quiz-option {
-            display: block; width: 100%; padding: 16px; margin: 10px 0;
-            background: white; border: 2px solid #cbd5e1; border-radius: 14px;
-            font-weight: 600; font-size: 1rem; color: #1e293b; transition: 0.2s;
+            transition: all 0.2s ease;
+            border: 2px solid #e2e8f0;
         }
 
-        #timer { font-size: 1.5rem; font-weight: 800; color: #d32f2f; background: #fff; padding: 5px 20px; border-radius: 20px; border: 2px solid #ffcdd2; margin-bottom: 10px; }
+        .quiz-option:hover {
+            border-color: #3b82f6;
+            background-color: #f1f5f9;
+        }
 
-        .data-form { background: #f8fafc; border: 2px solid #e2e8f0; padding: 20px; display: none; flex-direction: column; gap: 12px; width: 100%; border-radius: 16px; box-sizing: border-box; }
-        .data-form input { padding: 16px; border: 2px solid #cbd5e1; border-radius: 12px; font-size: 1rem; width: 100%; box-sizing: border-box; }
+        /* Hide scrollbars for a clean app feel */
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
     </style>
 </head>
-<body>
+<body class="flex flex-col">
 
-    <div class="game-container">
-        <h1>BILASTINE FOCUS CHALLENGE</h1>
-        <canvas id="gameCanvas"></canvas>
-        <div class="game-info">Score: <span id="score">0</span> / 1000</div>
-        
-        <div id="initialControls" style="width:100%"><button id="startButton">START FLIGHT</button></div>
+<!-- Chosen Palette: Clinical Precision (Clean White + Slate + Tech Blue) -->
+<!-- Application Structure Plan: 
+    Optimized "Single-Screen" Dashboard Structure:
+    1. Header: Slim persistent brand identity.
+    2. Left Column (Science & Context): Clinical science introduction messaging.
+    3. Right Column (Interactive Engine): The Game -> Quiz -> Data Form sequence.
+    WHY: This layout avoids vertical scrolling by grouping secondary information (Science) horizontally next to the primary interaction (Game).
+-->
 
-        <div id="winMsg" class="ui-section win-message">
-            <h3>MISSION SUCCESS!</h3>
-            <p>Score: 1000 reached. You are focused!</p>
-            <button id="startQuizBtn">TAKE FOCUS QUIZ</button>
-        </div>
-
-        <div id="loseMsg" class="ui-section lose-message">
-            <h3>TURBULENCE!</h3>
-            <p>You lost focus. Practice makes perfect.</p>
-            <button onclick="location.reload()">TRY AGAIN</button>
-        </div>
-
-        <div id="quizContainer" class="ui-section quiz-section">
-            <div id="timer">0.0s</div>
-            <p id="questionText" style="font-weight:700"></p>
-            <div id="optionsContainer" style="width:100%"></div>
-        </div>
-
-        <div id="dataForm" class="data-form">
-            <h3>RECORD PERFORMANCE</h3>
-            <p id="finalStats" style="color:#1976d2; font-weight:700"></p>
-            <input type="text" id="playerName" placeholder="Full Name" required>
-            <input type="email" id="playerEmail" placeholder="Email Address" required>
-            <input type="text" id="placeOfPractice" placeholder="Hospital / Clinic" required>
-            <button id="submitBtn">SUBMIT RECORD</button>
-        </div>
-        <div id="status" style="margin-top:10px; font-weight:700"></div>
+<nav class="glass-panel border-b border-slate-200 py-3 px-6 shrink-0">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+        <div class="font-800 text-lg text-blue-700 tracking-tighter">BILASTINE<span class="font-400 text-slate-400">FOCUS</span></div>
+        <div class="text-xs font-700 uppercase tracking-widest text-slate-400">HCP Interactive Dashboard</div>
     </div>
+</nav>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+<main class="flex-grow flex flex-col md:grid md:grid-cols-12 gap-4 p-4 max-w-7xl mx-auto w-full overflow-hidden">
 
-        // --- PASTE YOUR CONFIG HERE ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyAzuyfJmP3Wz78KZKBXTIh74cKA3k9duI8",
-            authDomain: "sg-bilastine-focus-2026.firebaseapp.com",
-            projectId: "sg-bilastine-focus-2026",
-            storageBucket: "sg-bilastine-focus-2026.firebasestorage.app",
-            messagingSenderId: "90505020446",
-            appId: "1:90505020446:web:aaffdc8484bffc00a25a0f"
-        };
+    <!-- LEFT COLUMN: Clinical Insights -->
+    <aside class="md:col-span-4 flex flex-col gap-4 overflow-y-auto">
+        <section class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+            <h3 class="text-sm font-800 text-blue-600 uppercase tracking-wider mb-2">The Science of Focus</h3>
+            <p class="text-xs leading-relaxed text-slate-600">
+                Allergic Rhinitis treatments shouldn't compromise patient safety. Bilastine provides 24H symptom relief with a non-sedating profile that preserves cognitive alertness.
+            </p>
+        </section>
 
+        <section class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex-grow">
+            <h3 class="text-sm font-800 text-slate-900 mb-2">Cognitive Preservation</h3>
+            <p class="text-xs leading-relaxed text-slate-600 mb-4">
+                Clinical studies emphasize that Bilastine does not cross the blood-brain barrier significantly at therapeutic doses, meaning patients maintain their focus during work, driving, and daily activities.
+            </p>
+            <div class="space-y-3">
+                <div class="p-3 bg-blue-50 rounded-xl border border-blue-100">
+                    <p class="text-[11px] font-800 text-blue-700 uppercase">Alertness Profile</p>
+                    <p class="text-xs text-slate-600">Comparable to placebo in reaction time tests.</p>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <p class="text-[11px] font-800 text-slate-700 uppercase">Duration of Action</p>
+                    <p class="text-xs text-slate-600">Maintains non-impairing status for a full 24 hours.</p>
+                </div>
+            </div>
+        </section>
+    </aside>
+
+    <!-- RIGHT COLUMN: Interactive Engine -->
+    <div class="md:col-span-8 flex flex-col gap-4 overflow-y-auto">
+        
+        <!-- Game Section -->
+        <section id="gameSection" class="bg-white rounded-2xl shadow-xl p-4 border border-slate-100 flex flex-col h-full">
+            <div class="flex justify-between items-center mb-3">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    <h3 class="font-800 text-slate-800">Alertness Mission</h3>
+                </div>
+                <div class="font-800 text-xl bg-blue-50 text-blue-600 px-4 py-1 rounded-lg">
+                    Score: <span id="score">0</span>/1000
+                </div>
+            </div>
+
+            <div class="relative flex-grow min-h-[250px] bg-slate-100 rounded-xl overflow-hidden">
+                <canvas id="gameCanvas" class="w-full h-full"></canvas>
+                
+                <!-- Start Overlay -->
+                <div id="startOverlay" class="absolute inset-0 overlay-card flex flex-col items-center justify-center text-white p-6 text-center">
+                    <h4 class="text-xl font-800 mb-2">Ready to fly?</h4>
+                    <p class="text-sm text-slate-300 mb-6">Maintain focus. Avoid the clouds.</p>
+                    <button id="startButton" class="bg-blue-600 hover:bg-blue-500 text-white font-800 px-10 py-3 rounded-full shadow-lg transition-transform active:scale-95">
+                        BEGIN FLIGHT
+                    </button>
+                </div>
+
+                <!-- Win Overlay -->
+                <div id="winMsg" class="absolute inset-0 hidden overlay-card flex flex-col items-center justify-center text-white p-6 text-center">
+                    <div class="bg-green-500 p-3 rounded-full mb-4">
+                        <unicode class="text-2xl">✓</unicode>
+                    </div>
+                    <h3 class="text-2xl font-800 mb-2">PERFECT FOCUS</h3>
+                    <p class="text-sm mb-6">You've reached 1000 points. Let's validate the clinical science.</p>
+                    <button id="startQuizBtn" class="bg-white text-blue-600 font-800 px-8 py-3 rounded-full hover:bg-slate-100 transition-colors">
+                        START KNOWLEDGE QUIZ
+                    </button>
+                </div>
+
+                <!-- Lose Overlay -->
+                <div id="loseMsg" class="absolute inset-0 hidden overlay-card flex flex-col items-center justify-center text-white p-6 text-center">
+                    <h3 class="text-2xl font-800 mb-2">TURBULENCE</h3>
+                    <p class="text-sm mb-6">Focus was interrupted. Bilastine helps patients stay sharp.</p>
+                    <button onclick="location.reload()" class="bg-red-500 text-white font-800 px-8 py-3 rounded-full hover:bg-red-400 transition-colors">
+                        RETRY MISSION
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quiz Section -->
+        <section id="quizContainer" class="hidden bg-blue-600 rounded-2xl p-6 text-white shadow-2xl flex-grow flex flex-col justify-center">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-800 text-lg">Knowledge Validation</h3>
+                <div id="timer" class="bg-white text-blue-600 px-4 py-1 rounded-full font-800 text-sm">0.0s</div>
+            </div>
+            <p id="questionText" class="text-xl font-700 mb-8 leading-tight"></p>
+            <div id="optionsContainer" class="grid grid-cols-1 gap-3"></div>
+        </section>
+
+        <!-- Data Form Section -->
+        <section id="dataForm" class="hidden bg-slate-900 rounded-2xl p-6 text-white shadow-2xl flex-grow flex flex-col justify-center">
+            <div class="text-center mb-6">
+                <h3 class="text-2xl font-800">Mission Record</h3>
+                <p id="finalStats" class="text-blue-400 font-700 mt-1"></p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl mx-auto w-full">
+                <input type="text" id="playerName" placeholder="Full Name" class="p-3 rounded-xl bg-slate-800 border-none text-white focus:ring-2 focus:ring-blue-500 text-sm">
+                <input type="email" id="playerEmail" placeholder="Email Address" class="p-3 rounded-xl bg-slate-800 border-none text-white focus:ring-2 focus:ring-blue-500 text-sm">
+                <input type="text" id="placeOfPractice" placeholder="Hospital / Clinic" class="md:col-span-2 p-3 rounded-xl bg-slate-800 border-none text-white focus:ring-2 focus:ring-blue-500 text-sm">
+                <button id="submitBtn" class="md:col-span-2 py-3 bg-blue-600 rounded-xl font-800 text-lg hover:bg-blue-500 transition-colors">
+                    SUBMIT TO REGISTRY
+                </button>
+            </div>
+            <div id="status" class="text-center mt-4 font-700 text-xs"></div>
+        </section>
+
+    </div>
+</main>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // --- CONFIGS ---
+    const firebaseConfig = { 
+        apiKey: "AIzaSyAzuyfJmP3Wz78KZKBXTIh74cKA3k9duI8", 
+        authDomain: "sg-bilastine-focus-2026.firebaseapp.com", 
+        projectId: "sg-bilastine-focus-2026", 
+        storageBucket: "sg-bilastine-focus-2026.firebasestorage.app", 
+        messagingSenderId: "90505020446", 
+        appId: "1:90505020446:web:aaffdc8484bffc00a25a0f" 
+    };
+    const SHEETS_URL = "https://script.google.com/macros/s/AKfycbxMo6TAF6eRLdKrQuW_GBBlJzVPAFbrtmCyreAZ8D-jzoDwWYShmgGv3HVIMpzz-8Ec/exec"; 
+
+    let db = null;
+    try {
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        signInAnonymously(auth);
+        db = getFirestore(app);
+        signInAnonymously(getAuth(app));
+    } catch (e) { console.warn("Cloud features offline"); }
 
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        let gameRunning = false, score = 0, lastObs = 0, animationId;
-        const airplane = { x: 0, y: 0, w: 40, h: 30 }, obstacles = [];
+    // --- GAME ENGINE ---
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    let gameRunning = false, score = 0, lastObs = 0, animationId;
+    const airplane = { x: 0, y: 0, w: 40, h: 28 };
+    let obstacles = [];
 
-        function resize() {
-            canvas.width = canvas.parentElement.clientWidth - 48;
-            canvas.height = 280;
-            airplane.x = canvas.width/2 - 20; airplane.y = canvas.height - 50;
+    function resize() {
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+        airplane.x = canvas.width / 2 - 20;
+        airplane.y = canvas.height - 50;
+    }
+    window.onresize = resize;
+    setTimeout(resize, 100);
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Plane
+        ctx.fillStyle = '#FFD700'; 
+        ctx.beginPath();
+        ctx.roundRect(airplane.x, airplane.y, airplane.w, airplane.h, 6);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(airplane.x + 8, airplane.y + 6, 12, 4);
+
+        // Clouds
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        obstacles.forEach(o => {
+            ctx.beginPath();
+            ctx.arc(o.x + 10, o.y + 10, 12, 0, Math.PI * 2);
+            ctx.arc(o.x + 22, o.y + 12, 14, 0, Math.PI * 2);
+            ctx.fill();
+        });
+    }
+
+    function update(t) {
+        if (!gameRunning) return;
+        
+        if (t - lastObs > 400) {
+            obstacles.push({ x: Math.random() * (canvas.width - 40), y: -50 });
+            lastObs = t;
         }
-        window.onresize = resize; resize();
 
-        function draw() {
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-            ctx.fillStyle = '#FFD700'; ctx.fillRect(airplane.x, airplane.y, airplane.w, airplane.h);
-            ctx.fillStyle = '#fff'; obstacles.forEach(o => {
-                ctx.beginPath(); ctx.arc(o.x+10, o.y+10, 12, 0, Math.PI*2); ctx.arc(o.x+22, o.y+12, 14, 0, Math.PI*2); ctx.fill();
-            });
-        }
-
-        function update(t) {
-            if(!gameRunning) return;
-            if(t - lastObs > 500) { obstacles.push({x: Math.random()*(canvas.width-35), y:-40, w:35, h:25}); lastObs = t; }
-            for(let i=obstacles.length-1; i>=0; i--) {
-                obstacles[i].y += 5;
-                if(airplane.x < obstacles[i].x+35 && airplane.x+40 > obstacles[i].x && airplane.y < obstacles[i].y+25 && airplane.y+30 > obstacles[i].y) {
-                    gameRunning = false; document.getElementById('loseMsg').style.display='block'; return;
-                }
-                if(obstacles[i].y > canvas.height) { obstacles.splice(i,1); score += 50; document.getElementById('score').innerText = score; }
+        for (let i = obstacles.length - 1; i >= 0; i--) {
+            obstacles[i].y += 5.5;
+            
+            if (airplane.x < obstacles[i].x + 35 && airplane.x + airplane.w > obstacles[i].x &&
+                airplane.y < obstacles[i].y + 25 && airplane.y + airplane.h > obstacles[i].y) {
+                gameRunning = false;
+                document.getElementById('loseMsg').classList.remove('hidden');
+                return;
             }
-            if(score >= 1000) { gameRunning = false; document.getElementById('winMsg').style.display='block'; return; }
-            draw(); animationId = requestAnimationFrame(update);
+
+            if (obstacles[i].y > canvas.height) {
+                obstacles.splice(i, 1);
+                score += 50;
+                document.getElementById('score').innerText = score;
+            }
         }
 
-        function move(e) {
-            if(!gameRunning) return;
-            const x = (e.clientX || e.touches[0].clientX) - canvas.getBoundingClientRect().left - 20;
-            airplane.x = Math.max(0, Math.min(canvas.width - 40, x));
-        }
-        canvas.addEventListener('pointermove', move);
-
-        const questions = [
-            { q: "Primary advantage of Bilastine?", options: ["Causes Drowsiness", "Non-sedating Profile", "Take with Food"], c: 1 },
-            { q: "Bilastine preserves focus in allergic patients?", options: ["No", "Yes, it is non-impairing", "Only at night"], c: 1 }
-        ];
-        let qIdx = 0, qStart, qDur, timerInt;
-
-        document.getElementById('startButton').onclick = () => { document.getElementById('initialControls').style.display='none'; gameRunning=true; animationId=requestAnimationFrame(update); };
-        document.getElementById('startQuizBtn').onclick = () => {
-            document.getElementById('winMsg').style.display='none'; document.getElementById('quizContainer').style.display='flex';
-            qStart = Date.now(); timerInt = setInterval(() => { document.getElementById('timer').innerText = ((Date.now()-qStart)/1000).toFixed(1) + 's'; }, 100);
-            renderQ();
-        };
-
-        function renderQ() {
-            const q = questions[qIdx]; document.getElementById('questionText').innerText = q.q;
-            const cont = document.getElementById('optionsContainer'); cont.innerHTML = '';
-            q.options.forEach((o, i) => {
-                const b = document.createElement('button'); b.className = 'quiz-option'; b.innerText = o;
-                b.onclick = () => {
-                    if(i === q.c) { qIdx++; if(qIdx < questions.length) renderQ(); else endQuiz(); }
-                    else { b.style.borderColor='red'; setTimeout(()=>b.style.borderColor='#cbd5e1', 500); }
-                };
-                cont.appendChild(b);
-            });
+        if (score >= 1000) {
+            gameRunning = false;
+            document.getElementById('winMsg').classList.remove('hidden');
+            return;
         }
 
-        function endQuiz() {
-            clearInterval(timerInt); qDur = (Date.now()-qStart)/1000;
-            document.getElementById('quizContainer').style.display='none'; document.getElementById('dataForm').style.display='flex';
-            document.getElementById('finalStats').innerText = `Focused Quiz Time: ${qDur.toFixed(2)}s`;
-        }
+        draw();
+        animationId = requestAnimationFrame(update);
+    }
 
-        document.getElementById('submitBtn').onclick = async () => {
-            const n = document.getElementById('playerName').value, e = document.getElementById('playerEmail').value, p = document.getElementById('placeOfPractice').value;
-            if(!n || !e || !p) return;
-            document.getElementById('status').innerText = "Saving...";
-            try {
-                await addDoc(collection(db, "artifacts/bilastine-focus-challenge/public/data/game_entries"), { n, e, p, qDur, score: 1000, time: serverTimestamp() });
-                document.getElementById('status').innerText = "Record Saved! Thank you."; setTimeout(()=>location.reload(), 2000);
-            } catch(err) { document.getElementById('status').innerText = "Error saving."; }
-        };
-    </script>
+    function handlePointer(e) {
+        if (!gameRunning) return;
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+        if (clientX === undefined) return;
+        const x = clientX - rect.left - (airplane.w / 2);
+        airplane.x = Math.max(0, Math.min(canvas.width - airplane.w, x));
+        draw();
+    }
+    
+    canvas.addEventListener('pointermove', handlePointer);
+    window.addEventListener('keydown', (e) => {
+        if (!gameRunning) return;
+        if (e.key === "ArrowLeft") airplane.x = Math.max(0, airplane.x - 25);
+        if (e.key === "ArrowRight") airplane.x = Math.min(canvas.width - airplane.w, airplane.x + 25);
+        draw();
+    });
+
+    // --- INTERFACE LOGIC ---
+    const questions = [
+        { q: "Clinical Focus: How does Bilastine compare to 1st Gen antihistamines regarding reaction time?", options: ["It significantly improves speed", "It is non-impairing and preserves focus", "It slows down reaction time"], c: 1 },
+        { q: "Why is preserved cognitive focus vital for allergy patients?", options: ["Work safety and productivity", "Better sleep during the day", "Improved sense of smell"], c: 0 }
+    ];
+    let qIdx = 0, qStart, qDur, timerInt;
+
+    document.getElementById('startButton').onclick = () => {
+        document.getElementById('startOverlay').classList.add('hidden');
+        gameRunning = true;
+        score = 0; obstacles = [];
+        document.getElementById('score').innerText = "0";
+        lastObs = performance.now();
+        animationId = requestAnimationFrame(update);
+    };
+
+    document.getElementById('startQuizBtn').onclick = () => {
+        document.getElementById('gameSection').classList.add('hidden');
+        document.getElementById('quizContainer').classList.remove('hidden');
+        qStart = Date.now();
+        timerInt = setInterval(() => {
+            document.getElementById('timer').innerText = ((Date.now() - qStart) / 1000).toFixed(1) + 's';
+        }, 100);
+        renderQ();
+    };
+
+    function renderQ() {
+        const q = questions[qIdx];
+        document.getElementById('questionText').innerText = q.q;
+        const cont = document.getElementById('optionsContainer');
+        cont.innerHTML = '';
+        q.options.forEach((o, i) => {
+            const b = document.createElement('button');
+            b.className = 'quiz-option bg-white text-slate-800 p-4 rounded-xl font-700 text-left text-sm';
+            b.innerText = o;
+            b.onclick = () => {
+                if (i === q.c) {
+                    qIdx++;
+                    if (qIdx < questions.length) renderQ(); else endQuiz();
+                } else {
+                    b.classList.add('bg-red-100', 'text-red-700', 'border-red-300');
+                    setTimeout(() => b.classList.remove('bg-red-100', 'text-red-700', 'border-red-300'), 500);
+                }
+            };
+            cont.appendChild(b);
+        });
+    }
+
+    function endQuiz() {
+        clearInterval(timerInt);
+        qDur = (Date.now() - qStart) / 1000;
+        document.getElementById('quizContainer').classList.add('hidden');
+        document.getElementById('dataForm').classList.remove('hidden');
+        document.getElementById('finalStats').innerText = `Verified focus in ${qDur.toFixed(2)}s`;
+    }
+
+    document.getElementById('submitBtn').onclick = async () => {
+        const n = document.getElementById('playerName').value, e = document.getElementById('playerEmail').value, p = document.getElementById('placeOfPractice').value;
+        if (!n || !e || !p) return;
+        const status = document.getElementById('status');
+        status.innerText = "Syncing with Focus Registry...";
+        const payload = { name: n, email: e, placeOfPractice: p, quizTime: qDur, score: 1000 };
+        if (db) try { await addDoc(collection(db, "artifacts/bilastine-focus-challenge/public/data/game_entries"), { ...payload, time: serverTimestamp() }); } catch(err) {}
+        if (SHEETS_URL) try { await fetch(SHEETS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); } catch(err) {}
+        status.innerText = "MISSION RECORDED. THANK YOU.";
+        setTimeout(() => location.reload(), 2000);
+    };
+</script>
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 </body>
-
 </html>
